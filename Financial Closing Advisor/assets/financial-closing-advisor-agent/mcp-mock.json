@@ -1,0 +1,125 @@
+{
+  "tools": [
+    {
+      "name": "get_closing_tasks",
+      "description": "Retrieve all closing tasks for the active (or specified) financial period.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Financial period to retrieve tasks for (e.g. '2024-12'). Defaults to the active period."
+          }
+        }
+      },
+      "mock_response": {
+        "period": "2024-12",
+        "total_tasks": 12,
+        "tasks": [
+          {"task_id": "T001", "description": "Accounts Payable Reconciliation", "status": "completed", "owner": {"name": "Alice Chen", "email": "alice.chen@company.com"}, "priority": "high", "deadline": "2024-12-31T23:59:00Z", "dependencies": [], "error_message": null, "missing_fields": []},
+          {"task_id": "T002", "description": "Accounts Receivable Clearing", "status": "completed", "owner": {"name": "Bob Kumar", "email": "bob.kumar@company.com"}, "priority": "high", "deadline": "2024-12-31T23:59:00Z", "dependencies": [], "error_message": null, "missing_fields": []},
+          {"task_id": "T003", "description": "Fixed Asset Depreciation Run", "status": "in-progress", "owner": {"name": "Carol Smith", "email": "carol.smith@company.com"}, "priority": "high", "deadline": "2024-12-31T06:00:00Z", "dependencies": [], "error_message": null, "missing_fields": []},
+          {"task_id": "T004", "description": "Inventory Valuation", "status": "blocked", "owner": {"name": "David Lee", "email": "david.lee@company.com"}, "priority": "high", "deadline": "2024-12-31T08:00:00Z", "dependencies": ["T001"], "error_message": "PERIOD_NOT_OPEN: Financial period 2024-12 is not open for posting in company code 1000.", "missing_fields": []},
+          {"task_id": "T005", "description": "Intercompany Eliminations", "status": "blocked", "owner": {"name": "Emma Wilson", "email": "emma.wilson@company.com"}, "priority": "high", "deadline": "2024-12-31T03:00:00Z", "dependencies": ["T001", "T002"], "error_message": "INCOMPLETE_INTERCOMPANY_POSTING: Counterpart posting missing for company code 2000.", "missing_fields": []},
+          {"task_id": "T006", "description": "Foreign Currency Revaluation", "status": "blocked", "owner": {"name": "Frank Müller", "email": "frank.muller@company.com"}, "priority": "medium", "deadline": "2024-12-31T10:00:00Z", "dependencies": ["T001", "T002"], "error_message": null, "missing_fields": ["exchange_rate_EUR_USD_2024-12-31", "exchange_rate_GBP_USD_2024-12-31"]},
+          {"task_id": "T007", "description": "Accruals Posting", "status": "pending", "owner": {"name": "Grace Tanaka", "email": "grace.tanaka@company.com"}, "priority": "medium", "deadline": "2024-12-31T12:00:00Z", "dependencies": ["T001", "T002"], "error_message": null, "missing_fields": []},
+          {"task_id": "T008", "description": "Cost Centre Allocation", "status": "pending", "owner": {"name": "Henry Brown", "email": "henry.brown@company.com"}, "priority": "medium", "deadline": "2024-12-31T14:00:00Z", "dependencies": ["T003", "T007"], "error_message": null, "missing_fields": []},
+          {"task_id": "T009", "description": "Profit Centre Settlement", "status": "pending", "owner": {"name": "Irene Patel", "email": "irene.patel@company.com"}, "priority": "medium", "deadline": "2024-12-31T16:00:00Z", "dependencies": ["T008"], "error_message": null, "missing_fields": []},
+          {"task_id": "T010", "description": "Trial Balance Extraction", "status": "pending", "owner": {"name": "James O'Brien", "email": "james.obrien@company.com"}, "priority": "high", "deadline": "2024-12-31T18:00:00Z", "dependencies": ["T001","T002","T003","T004","T005","T006","T007","T008","T009"], "error_message": null, "missing_fields": []},
+          {"task_id": "T011", "description": "Management Report Generation", "status": "pending", "owner": {"name": "Karen Liu", "email": "karen.liu@company.com"}, "priority": "high", "deadline": "2024-12-31T05:00:00Z", "dependencies": ["T010"], "error_message": null, "missing_fields": []},
+          {"task_id": "T012", "description": "Period Lock", "status": "pending", "owner": {"name": "Alice Chen", "email": "alice.chen@company.com"}, "priority": "high", "deadline": "2024-12-31T22:00:00Z", "dependencies": ["T010","T011"], "error_message": null, "missing_fields": []}
+        ]
+      }
+    },
+    {
+      "name": "get_task_dependencies",
+      "description": "Return the dependency map for the current closing plan.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "mock_response": {
+        "dependency_map": {
+          "T001": {"description": "Accounts Payable Reconciliation", "depends_on": [], "status": "completed"},
+          "T002": {"description": "Accounts Receivable Clearing", "depends_on": [], "status": "completed"},
+          "T003": {"description": "Fixed Asset Depreciation Run", "depends_on": [], "status": "in-progress"},
+          "T004": {"description": "Inventory Valuation", "depends_on": ["T001"], "status": "blocked"},
+          "T005": {"description": "Intercompany Eliminations", "depends_on": ["T001", "T002"], "status": "blocked"},
+          "T006": {"description": "Foreign Currency Revaluation", "depends_on": ["T001", "T002"], "status": "blocked"},
+          "T007": {"description": "Accruals Posting", "depends_on": ["T001", "T002"], "status": "pending"},
+          "T008": {"description": "Cost Centre Allocation", "depends_on": ["T003", "T007"], "status": "pending"},
+          "T009": {"description": "Profit Centre Settlement", "depends_on": ["T008"], "status": "pending"},
+          "T010": {"description": "Trial Balance Extraction", "depends_on": ["T001","T002","T003","T004","T005","T006","T007","T008","T009"], "status": "pending"},
+          "T011": {"description": "Management Report Generation", "depends_on": ["T010"], "status": "pending"},
+          "T012": {"description": "Period Lock", "depends_on": ["T010","T011"], "status": "pending"}
+        },
+        "total_tasks": 12
+      }
+    },
+    {
+      "name": "get_period_status",
+      "description": "Return the open/closed status and closing deadline of the current financial period.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "mock_response": {
+        "period": "2024-12",
+        "status": "open",
+        "closing_deadline": "2024-12-31T23:59:00Z",
+        "company_code": "1000",
+        "ledger": "0L"
+      }
+    },
+    {
+      "name": "get_closing_config",
+      "description": "Read the closing calendar, task ownership, escalation thresholds, and deadline proximity configuration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string",
+            "description": "Configuration section to retrieve. Omit for full config."
+          }
+        }
+      },
+      "mock_response": {
+        "config": {
+          "closing_calendar": [
+            {"entity_id": "1000", "entity_name": "Company Code 1000", "period": "2024-12", "closing_date": "2024-12-31T23:59:00Z"}
+          ],
+          "task_ownership": {
+            "T001": {"owner_email": "alice.chen@company.com", "owner_name": "Alice Chen"},
+            "T002": {"owner_email": "bob.kumar@company.com", "owner_name": "Bob Kumar"},
+            "T003": {"owner_email": "carol.smith@company.com", "owner_name": "Carol Smith"},
+            "T004": {"owner_email": "david.lee@company.com", "owner_name": "David Lee"},
+            "T005": {"owner_email": "emma.wilson@company.com", "owner_name": "Emma Wilson"},
+            "T006": {"owner_email": "frank.muller@company.com", "owner_name": "Frank Müller"},
+            "T007": {"owner_email": "grace.tanaka@company.com", "owner_name": "Grace Tanaka"},
+            "T008": {"owner_email": "henry.brown@company.com", "owner_name": "Henry Brown"},
+            "T009": {"owner_email": "irene.patel@company.com", "owner_name": "Irene Patel"},
+            "T010": {"owner_email": "james.obrien@company.com", "owner_name": "James O'Brien"},
+            "T011": {"owner_email": "karen.liu@company.com", "owner_name": "Karen Liu"},
+            "T012": {"owner_email": "alice.chen@company.com", "owner_name": "Alice Chen"}
+          },
+          "escalation_thresholds": {"warning_hours": 8, "critical_hours": 4, "breach_hours": 0},
+          "deadline_proximity_alert_hours": 6
+        }
+      }
+    },
+    {
+      "name": "update_closing_config",
+      "description": "Update a specific configuration parameter.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "section": {"type": "string"},
+          "key": {"type": "string"},
+          "value": {}
+        },
+        "required": ["section", "key", "value"]
+      },
+      "mock_response": "Configuration updated: escalation_thresholds.warning_hours = 6"
+    }
+  ]
+}

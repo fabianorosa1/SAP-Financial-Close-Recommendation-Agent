@@ -1,0 +1,10 @@
+apiVersion: solution.sap/v1
+kind: Solution
+
+metadata:
+  name: financial-closing-advisor-cd126
+  version: 1.0.0
+  description: AI agent that supports financial controllers during the financial closing cycle by monitoring closing tasks, evaluating dependency chains, recommending next actions, and identifying blockers.
+
+assets:
+  - ref: ./assets/financial-closing-advisor-agent/asset.yaml
